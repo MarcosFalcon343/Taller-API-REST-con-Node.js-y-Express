@@ -1,121 +1,53 @@
+// index.js
 const express = require('express');
-
 const app = express();
 
+// Puerto
 const PORT = process.env.PORT || 3000;
 
+// Middleware para leer JSON en las peticiones
 app.use(express.json());
 
-// Ruta raíz '/'
+// 1. Ruta raíz '/'
 app.get('/', (req, res) => {
   res.send('Hola Mundo desde Express. Este es mi primer servidor web');
 });
 
-// Ruta GET '/saludo'
+// 2. Ruta GET '/saludo'
 app.get('/saludo', (req, res) => {
   res.json({
     mensaje: 'Hola',
-    autor: 'Aquino Reyes Jorge Alfredo',
+    autor: 'Falcon',
     fecha: new Date()
   });
 });
 
-// Ruta POST '/datos' 
+// 3. Ruta POST '/datos'
 app.post('/datos', (req, res) => {
-  console.log('Datos recibidos en /datos:', req.body);
+  console.log(req.body);       // Para ver lo que envía el cliente
 
   res.json({
-    mensaje: 'Datos recibidos',
+    mensaje: 'Datos recibidos correctamente',
     datos: req.body
   });
 });
 
+// Mock de datos
 const usuarios = [
-  { id: 1, nombre: 'Juan', edad: 28 },
-  { id: 2, nombre: 'María', edad: 34 },
-  { id: 3, nombre: 'Pedro', edad: 45 }
+    { id: 1, nombre: 'Juan', edad: 28 },
+    { id: 2, nombre: 'María', edad: 34 },
+    { id: 3, nombre: 'Pedro', edad: 45 }
 ];
-// GET /user -> listar usuarios
-app.get('/user', (req, res) => {
-  res.json({
-    usuarios: usuarios
-  });
-});
 
-// POST /user
-app.post('/user', (req, res) => {
-  /**
-   * Estructura esperada del cuerpo de la petición:
-   * {
-   *   "nombre": String,
-   *   "edad": Number
-   * }
-   */
-  const cuerpo = req.body;
-
-  const usuario = {
-    id: usuarios.length + 1,
-    nombre: cuerpo.nombre,
-    edad: cuerpo.edad
-  };
-
-  usuarios.push(usuario);
-
-  res.json({
-    mensaje: 'Usuario agregado exitosamente (versión /user)',
-    nuevo_usuario: usuario,
-    usuarios_actualizdos: usuarios
-  });
-});
-
-// PUT /user/:id
-app.put('/user/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const cuerpo = req.body;
-
-  const usuarioIndex = usuarios.findIndex(u => u.id === id);
-  if (usuarioIndex === -1) {
-    return res.status(404).json({ mensaje: 'Usuario no encontrado (versión /user)' });
-  }
-
-  usuarios[usuarioIndex].nombre = cuerpo.nombre || usuarios[usuarioIndex].nombre;
-  usuarios[usuarioIndex].edad   = cuerpo.edad   || usuarios[usuarioIndex].edad;
-
-  res.json({
-    mensaje: 'Usuario actualizado exitosamente (versión /user)',
-    usuario_actualizado: usuarios[usuarioIndex],
-    usuarios_actualizdos: usuarios
-  });
-});
-
-// DELETE /user/:id
-app.delete('/user/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-
-  const usuarioIndex = usuarios.findIndex(u => u.id === id);
-  if (usuarioIndex === -1) {
-    return res.status(404).json({ mensaje: 'Usuario no encontrado (versión /user)' });
-  }
-
-  const usuarioEliminado = usuarios.splice(usuarioIndex, 1);
-
-  res.json({
-    mensaje: 'Usuario eliminado exitosamente (versión /user)',
-    usuario_eliminado: usuarioEliminado[0],
-    usuarios_actualizdos: usuarios
-  });
-});
 // POST /usuario
 app.post('/usuario', (req, res) => {
   const { nombre, edad } = req.body;
 
-    const usuarioIndex = usuarios.findIndex(u => u.id === id);
-    if (usuarioIndex === -1) {
-        return res.status(404).json({ mensaje: "Usuario no encontrado" });
-    }
-
-    usuarios[usuarioIndex].nombre = cuerpo.nombre || usuarios[usuarioIndex].nombre;
-    usuarios[usuarioIndex].edad = cuerpo.edad || usuarios[usuarioIndex].edad;
+  if (!nombre || !edad) {
+    return res.status(400).json({
+      mensaje: 'Faltan datos: nombre y edad son obligatorios'
+    });
+  }
 
   const nuevoUsuario = {
     id: usuarios.length + 1,
@@ -132,10 +64,9 @@ app.post('/usuario', (req, res) => {
   });
 });
 
-// PUT /usuario/:id
 app.put('/usuario/:id', (req, res) => {
-  const { id } = req.params;
-  const { nombre, edad } = req.body;
+  const { id } = req.params;          
+  const { nombre, edad } = req.body;  
 
   const usuario = usuarios.find(u => u.id === Number(id));
 
@@ -155,7 +86,7 @@ app.put('/usuario/:id', (req, res) => {
   });
 });
 
-// DELETE /usuario/:id
+// DELETE /usuario/:id  -> eliminar usuario
 app.delete('/usuario/:id', (req, res) => {
   const { id } = req.params;
 
@@ -163,21 +94,22 @@ app.delete('/usuario/:id', (req, res) => {
 
   if (index === -1) {
     return res.status(404).json({
-      mensaje: `No se encontró el usuario con id ${id} (versión /usuario)`
+      mensaje: `No se encontró el usuario con id ${id}`
     });
   }
 
   const eliminado = usuarios[index];
+
   usuarios.splice(index, 1);
 
   res.json({
-    mensaje: 'Usuario eliminado correctamente (versión /usuario)',
+    mensaje: 'Usuario eliminado correctamente',
     eliminado,
     usuarios
   });
 });
 
-// Iniciamos el servidor
+// 4. Iniciar servidor
 app.listen(PORT, () => {
   console.log(`Servidor corriendo exitosamente en http://localhost:${PORT}`);
 });
